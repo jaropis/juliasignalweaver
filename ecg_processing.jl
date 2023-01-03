@@ -8,15 +8,23 @@ using CSV
 using DataFrames
 using Random
 using Peaks
+using ImageFiltering
 
-frequency = 200
-window_length = frequency * 20 # 20 second long windows
+# setup
+frequency = 200 # 200 for ecg
+window_length = frequency * 5 # 20 second long windows
+data_index = 2 # 2 for ecg
+savefilename = "ecg_template.png"
+datafilename = "csv1.csv"
+dpi = 300
+linewidth = 3
 
-function correlation_machine(frequency, window)
+# functions
+function template_search(frequency, window)
     """
-       Tcorrelation_machine.
+       Template search.
        
-       This function looks for correlations inside a window within a length of template.
+       This function looks repeating shape.
        
        Parameters:
        frequency - frequency of the signal in Hz
@@ -25,16 +33,31 @@ function correlation_machine(frequency, window)
        Returns:
        vector with autocorrelations within the window.
       	"""
-    template_length = frequency # this way we always get one second
+    if (isodd(frequency))
+        error("frequency needs to be an even number")
+    end
+    template_length = frequency + 1 # 100 + 1 for the kernel (for now)
     N = size(window, 1) - template_length
-    correlations = fill(0.0, N)
+    template = fill(0.0, template_length)
+    current_corr_sum = 0
+    ker = ImageFiltering.Kernel.gaussian((div(frequency, 4),))
+    kernel = fill(0.0, template_length)
+    bound = (length(ker) - 1) / 2 |> Int
+    # refactor the loop below
+    for i in -1*(bound-1):(bound+1)
+        kernel[i+div(frequency, 2)] = ker[i-1]
+    end
     for idi in 1:N
-        template = window[idi:(idi+template_length)]
+        segment = window[idi:(idi+template_length-1)] .* kernel
         for idj in 1:N
-            correlations[idj] = cor(template, window[idj:(idj+template_length)])
+            corsum = cor(segment, window[idj:(idj+template_length-1)]) |> sum
+            if corsum > current_corr_sum
+                template = window[idj:(idj+template_length-1)]
+                current_corr_sum = corsum
+            end
         end
     end
-    return (correlations)
+    return (template)
 end
 
 function plot_results(window, correlations)
@@ -53,43 +76,26 @@ function plot_results(window, correlations)
     return (p)
 end
 
-function find_good_maxima(correlations, segment_length, corr_threshold)
-    maxima = []
-    positions = []
-
-    return (maxima, positions)
-end
-
 function plot_results2(window, good_maxima, offset)
     p = plot!(window, show=true, legend=false)
     scatter!(good_maxima .+ offset, window[good_maxima.+offset], marker=:circle, markersize=5, color=:red)
     return (p)
 end
 
-ecg = CSV.read("csv1.csv", DataFrame)
+# reading data
+ecg = CSV.read(datafilename, DataFrame)
 N = size(ecg, 1) - window_length
 # beginnings of randomly selected windows
-Random.seed!(777)
+#Random.seed!(777)
 window_beginnings = rand(1:N, 10)
 
+# main loop
 for window_idx in window_beginnings[1]
-    global window = ecg[window_idx:(window_idx+window_length), :][:, 2]
-    global correlations = correlation_machine(Int(frequency * 2), window)
-    analyzed_vector = window .* (-1)
-    threshold = 10500
-    global good_maxima, vals = findmaxima(analyzed_vector)
-    good_maxima = good_maxima[(analyzed_vector)[good_maxima].>threshold]
-    #global good_peaks = findpeaks(window .* (-1), 1:length(window), min_prom=5000.0)
+    global window = ecg[window_idx:(window_idx+window_length), :][:, data_index]
+    global template = template_search(Int(frequency), window)
 end
-#plot_results(window, correlations)
-plot_results2(window .* (-1), Int.(good_maxima), 0)
-#print(length(window) - length(correlations))
-#print(good_peaks[1] - good_maxima[1])
-#print(window .* (-1))
-print("\n")
-print(good_maxima)
-print("\n")
-#print(good_peaks)
-#print(window[good_maxima])
+#plot!(ecg[1:2000, data_index], show=true, legend=false)
+plot!(template, show=true, legend=false, dpi=dpi, linewidth=linewidth)
+savefig(savefilename)
 sleep(10)
 end
