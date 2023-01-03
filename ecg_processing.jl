@@ -7,7 +7,7 @@ using StatsBase
 using CSV
 using DataFrames
 using Random
-using Findpeaks
+using Peaks
 
 frequency = 200
 window_length = frequency * 20 # 20 second long windows
@@ -56,33 +56,13 @@ end
 function find_good_maxima(correlations, segment_length, corr_threshold)
     maxima = []
     positions = []
-    for i in segment_length:(length(correlations)-segment_length)
-        position = i + segment_length - 1
-        segment = correlations[i:position]
-        max_in_segment = findmax(segment)
-        #print(max_in_segment)
-        #print("\n")
-        max_position = (i + max_in_segment[2])
-        if (max_position != i) && (max_position != position) && !(max_position in positions) && max_in_segment[1] >= corr_threshold
-            #print("i + position + max_position + max_in_segment[2] ")
-            #print(i)
-            #print(" ")
-            #print(position)
-            #print(" ")
-            #print(max_position)
-            #print(" ")
-            #print(max_in_segment[2])
-            #print("\n")
-            push!(maxima, max_in_segment[1])
-            push!(positions, max_position)
-        end
-    end
+
     return (maxima, positions)
 end
 
-function plot_results2(window, correlations, good_maxima, offset)
-    p = plot!(window, show=true)
-    scatter!(good_maxima[2] .- offset, window[good_maxima[2].-offset], marker=:circle, markersize=5, color=:red)
+function plot_results2(window, good_maxima, offset)
+    p = plot!(window, show=true, legend=false)
+    scatter!(good_maxima .+ offset, window[good_maxima.+offset], marker=:circle, markersize=5, color=:red)
     return (p)
 end
 
@@ -94,10 +74,22 @@ window_beginnings = rand(1:N, 10)
 
 for window_idx in window_beginnings[1]
     global window = ecg[window_idx:(window_idx+window_length), :][:, 2]
-    global correlations = correlation_machine(frequency, window)
-    global good_maxima = find_good_maxima(correlations, Int(frequency / 2), 0.7)
+    global correlations = correlation_machine(Int(frequency * 2), window)
+    analyzed_vector = window .* (-1)
+    threshold = 10500
+    global good_maxima, vals = findmaxima(analyzed_vector)
+    good_maxima = good_maxima[(analyzed_vector)[good_maxima].>threshold]
+    #global good_peaks = findpeaks(window .* (-1), 1:length(window), min_prom=5000.0)
 end
-plot_results(window, correlations)
-plot_results2(window, correlations, good_maxima, Int(62))
-sleep(20)
+#plot_results(window, correlations)
+plot_results2(window .* (-1), Int.(good_maxima), 0)
+#print(length(window) - length(correlations))
+#print(good_peaks[1] - good_maxima[1])
+#print(window .* (-1))
+print("\n")
+print(good_maxima)
+print("\n")
+#print(good_peaks)
+#print(window[good_maxima])
+sleep(10)
 end
