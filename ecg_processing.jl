@@ -86,7 +86,7 @@ function plot_results2(window, correlations, good_maxima, offset)
     return (p)
 end
 
-ecg = CSV.read("AVA02_2017-01-18.csv", DataFrame)
+ecg = CSV.read("csv1.csv", DataFrame)
 N = size(ecg, 1) - window_length
 # beginnings of randomly selected windows
 Random.seed!(777)
