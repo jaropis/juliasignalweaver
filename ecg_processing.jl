@@ -5,14 +5,12 @@ using DataFrames
 using Plots
 using StatsBase
 using CSV
-using DataFrames
 using Random
-using Peaks
 using ImageFiltering
 
 # setup
 frequency = 200 # 200 for ecg
-window_length = frequency * 5 # 20 second long windows
+window_length = frequency * 5 # 5 second long windows
 data_index = 2 # 2 for ecg
 savefilename = "ecg_template.png"
 datafilename = "csv1.csv"
@@ -22,17 +20,17 @@ linewidth = 3
 # functions
 function template_search(frequency, window)
     """
-       Template search.
-       
-       This function looks repeating shape.
-       
-       Parameters:
-       frequency - frequency of the signal in Hz
-       window - the segment of signal to be analyzed
-       
-       Returns:
-       vector with autocorrelations within the window.
-      	"""
+    Template search.
+
+    This function looks repeating shape.
+
+    Parameters:
+    frequency - frequency of the signal in Hz
+    window - the segment of signal to be analyzed
+
+    Returns:
+    vector with autocorrelations within the window.
+        """
     if (isodd(frequency))
         error("frequency needs to be an even number")
     end
@@ -63,7 +61,7 @@ end
 function plot_results(window, correlations)
     """
     plot results
-    	
+        
     Function returning two-panelled plot of the analysis - the first panel is the autocorrelations, the second is the actual signal
     Parameters:
     window - the segment of signal to be analyzed
@@ -94,8 +92,6 @@ for window_idx in window_beginnings[1]
     global window = ecg[window_idx:(window_idx+window_length), :][:, data_index]
     global template = template_search(Int(frequency), window)
 end
-#plot!(ecg[1:2000, data_index], show=true, legend=false)
 plot!(template, show=true, legend=false, dpi=dpi, linewidth=linewidth)
 savefig(savefilename)
-sleep(10)
 end
