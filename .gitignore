@@ -25,3 +25,5 @@ Manifest.toml
 .DS_Store
 *txt
 *png
+*edf
+*EDF
