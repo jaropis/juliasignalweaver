@@ -6,7 +6,7 @@ using StatsBase
 using Random
 using ImageFiltering
 using EDF
-export read_edf, template_search, locate_rs, plot_results
+export read_edf, template_search, locate_rs, plot_results, describe_edf_signal, select_signal
 function template_search(frequency, window)
     """
     Template search.
@@ -71,7 +71,7 @@ locate_rs = function (ecg, template, detection_threshold)
             else
                 break
             end
-            push!(rs, match_begin + argmax(abs.(match_window)))
+            push!(rs, match_begin + argmax(match_window))
             local_segment .= 0
             match_begin = 0
             match_end = 0
@@ -107,7 +107,19 @@ end
 
 function read_edf(filepath)
     data = EDF.read(filepath)
-    print(data[1])
+    data.signals
 end
 
+function select_signal(edf_signal, edf_signal_idx)
+    return ((edf_signal[edf_signal_idx]).samples)
+end
+
+function describe_edf_signal(edf_signal)
+    idx = 1
+    for sigdx in edf_signal
+        print(idx, ") ")
+        print(sigdx.header)
+        print("\n")
+    end
+end
 end
