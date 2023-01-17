@@ -8,11 +8,13 @@ frequency = 200 # 200 for ecg
 window_length = frequency * 5 # 5 second long windows
 data_index = 2 # 2 for ecg
 savefilename = "ecg_template.png"
-datafilename = "csv1.csv"
+datafilename = "csv2.csv"
 result_filename = "detected.png"
 dpi = 300
 linewidth = 3
 detection_threshold = 0.6
+amplitude_threshold = 0.33
+invert = true
 
 # functions
 # reading data
@@ -31,5 +33,10 @@ end
 #plot!(template, show=true, legend=false, dpi=dpi, linewidth=linewidth)
 #savefig(savefilename)
 print("looking for rs\n")
-rs = locate_rs(ecg[:, data_index], template, detection_threshold)
+if invert
+    multiplier = -1
+else
+    multiplier = 1
+end
+rs = locate_rs(multiplier .* ecg[:, data_index], multiplier .* template, detection_threshold, amplitude_threshold)
 plot_results(ecg[:, 2], rs, result_filename, 900 * frequency, 910 * frequency)

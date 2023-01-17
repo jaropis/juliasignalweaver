@@ -19,7 +19,7 @@ function template_search(frequency, window)
 
     Returns:
     vector with autocorrelations within the window.
-        """
+    """
     if (isodd(frequency))
         error("frequency needs to be an even number")
     end
@@ -47,7 +47,7 @@ function template_search(frequency, window)
     return (template)
 end
 
-locate_rs = function (ecg, template, detection_threshold)
+locate_rs = function (ecg, template, detection_threshold, amplitude_threshold)
     rs = []
     local_segment = fill(0, length(template))
     in_max = false
@@ -55,9 +55,14 @@ locate_rs = function (ecg, template, detection_threshold)
     match_end = 0
     match_length = []
     window_length = length(template)
+    evolution_range = abs.(maximum(template) - minimum(template))
     for idx in 1:(length(ecg)-length(template)+1)
-        local_correlation = cor(template, ecg[idx:(idx+length(template)-1)])
-        if (local_correlation > detection_threshold)
+        window = ecg[idx:(idx+length(template)-1)]
+        local_correlation = cor(template, window)
+        local_range = abs.(maximum(window) - minimum(window))
+        if ((local_correlation > detection_threshold) &&
+            local_range * (1 + amplitude_threshold) > evolution_range &&
+            local_range > amplitude_threshold * evolution_range)
             if !in_max
                 match_begin = idx
                 in_max = true
@@ -81,7 +86,7 @@ locate_rs = function (ecg, template, detection_threshold)
     return (rs)
 end
 
-function plot_results(window, good_maxima, filename, min, max)
+function plot_results(window, good_maxima, filename, min, max, plot_size=(1000, 500), draw=true)
     """
     plot results
         
@@ -100,9 +105,15 @@ function plot_results(window, good_maxima, filename, min, max)
     markers_x = x .- min
     markers_y = window[x.-1]
     y = window[min:max]
-    plot!(y, show=true, legend=false)
+    p = plot(y, show=true, legend=false)
+    if draw
+        plot!(size=(1400, 400), dpi=300)
+    end
     scatter!(markers_x, markers_y, marker=:circle, markersize=5, color=:red)
-    savefig(filename)
+    if draw
+        savefig(filename)
+    end
+    return (p)
 end
 
 function read_edf(filepath)
