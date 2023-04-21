@@ -39,4 +39,4 @@ else
     multiplier = 1
 end
 rs = locate_rs(multiplier .* ecg[:, data_index], multiplier .* template, detection_threshold, amplitude_threshold)
-plot_results(ecg[:, 2], rs, result_filename, 900 * frequency, 910 * frequency)
+# plot_results(ecg[:, 2], rs, result_filename, 900 * frequency, 910 * frequency)
