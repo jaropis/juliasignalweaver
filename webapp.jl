@@ -9,8 +9,11 @@ function request_handler(req)
     elseif req.method == "POST" && req.target == "/calculate"
         filepath = "g068.EDF"
         edf_signal = read_edf(filepath)
+        template = template_search(800,)
         y_values = select_signal(edf_signal, 1)
         x_values = range(0, length(y_values) - 1, step=1)
+        template = template_search(800, y_values[1:1500])
+        print(template)
         return HTTP.Response(200, JSON3.write(Dict("x" => x_values, "y" => y_values)))
     else
         return HTTP.Response(404, "Not Found")
