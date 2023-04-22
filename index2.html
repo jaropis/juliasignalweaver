@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scatter Plot with Clickable Points</title>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+</head>
+
+<body>
+
+    <div id="scatterPlot"></div>
+
+    <script>
+        // Generate random numbers for x and y axes
+        function randomNumbers(n) {
+            return Array.from({ length: n }, () => Math.random());
+        }
+
+        var x = randomNumbers(100);
+        var y = randomNumbers(100);
+
+        // Create an array with 'blue' as the initial color for all points
+        var initialColors = Array(100).fill('blue');
+
+        // Create the scatter plot trace
+        var trace = {
+            x: x,
+            y: y,
+            mode: 'markers',
+            type: 'scatter',
+            marker: { color: initialColors, size: 8 }
+        };
+
+        var data = [trace];
+        var layout = { hovermode: 'closest' };
+
+        // Create the plot
+        Plotly.newPlot('scatterPlot', data, layout);
+
+        // Change the color of a single point on click
+        var scatterPlotDiv = document.getElementById('scatterPlot');
+        scatterPlotDiv.on('plotly_click', function (data) {
+            console.log("ale plot!!!")
+            var pointIndex = data.points[0].pointNumber;
+            initialColors[pointIndex] = 'red';
+
+            var update = {
+                marker: { color: initialColors }
+            };
+
+            Plotly.update('scatterPlot', update);
+        });
+    </script>
+
+</body>
+
+</html>

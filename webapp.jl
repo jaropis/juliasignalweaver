@@ -4,7 +4,18 @@ include("signalweaver.jl")
 using Main.signalweaver
 
 function request_handler(req)
-    if req.method == "GET" && req.target == "/"
+    if req.method == "GET"
+        print(req.target)
+        if req.target == "/"
+            print("index.html\n")
+            return HTTP.Response(200, read("index.html", String))
+        elseif req.target == "/signalweaver.js"
+            print("js\n")
+            return HTTP.Response(200, read("signalweaver.js", String))
+        else
+            # Return a 404 Not Found response for other requests
+            return HTTP.Response(404, "Not Found")
+        end
         return HTTP.Response(200, read("index.html"))
     elseif req.method == "POST" && req.target == "/calculate"
         segment_length = 20000
