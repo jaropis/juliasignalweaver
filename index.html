@@ -62,17 +62,12 @@
             Plotly.newPlot('plot', data, layout);
         }
 
-        function updatePlot() {
-            const xhr = new XMLHttpRequest();
-            xhr.open("POST", "/calculate", true);
-            xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-            xhr.onreadystatechange = function () {
-                if (xhr.readyState === 4 && xhr.status === 200) {
-                    const response = JSON.parse(xhr.responseText);
-                    createPlot(response.x, response.y, response.pointsX, response.pointsY);
-                }
-            };
-            xhr.send();
+        async function updatePlot() {
+            res = await fetch("/calculate", {
+                method: "POST"
+            });
+            res = await res.json()
+            createPlot(res.x, res.y, res.pointsX, res.pointsY);
         }
 
         document.addEventListener("DOMContentLoaded", function () {
