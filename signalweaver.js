@@ -1,10 +1,10 @@
 class ECGplot {
     constructor() {
         this.oberver_present = false;
-        this.click_event = document.addEventListener("DOMContentLoaded", function () {
-            const submitButton = document.getElementById("submit");
-            submitButton.addEventListener("click", updatePlot);
-        });
+        // this.click_event = document.addEventListener("DOMContentLoaded", function () {
+        //     const submitButton = document.getElementById("submit");
+        //     submitButton.addEventListener("click", this.updatePlot);
+        // });
         this.ecgPlotDiv = null;
     }
 
@@ -75,16 +75,12 @@ class ECGplot {
         }
     }
 
-    updatePlot() {
-        const xhr = new XMLHttpRequest();
-        xhr.open("POST", "/calculate", true);
-        xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-        xhr.onreadystatechange = function () {
-            if (xhr.readyState === 4 && xhr.status === 200) {
-                const response = JSON.parse(xhr.responseText);
-                createPlot(response.x, response.y, response.pointsX, response.pointsY);
-            }
-        };
-        xhr.send();
+    async updatePlot() {
+        let res = await fetch("/calculate", {
+            method: "POST"
+        });
+        let result = await res.json()
+        console.log(result)
+        this.createPlot(result.x, result.y, result.pointsX, result.pointsY);
     }
 }
