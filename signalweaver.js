@@ -1,12 +1,12 @@
 class ECGplot {
     constructor() {
         this.oberver_present = false;
-        // this.click_event = document.addEventListener("DOMContentLoaded", function () {
-        //     const submitButton = document.getElementById("submit");
-        //     submitButton.addEventListener("click", this.updatePlot);
-        // });
         this.ecgPlotDiv = null;
-    }
+        document.addEventListener("DOMContentLoaded", () => {
+            const submitButton = document.getElementById("submit");
+            submitButton.addEventListener("click", this.updatePlot.bind(this))
+        });
+    };
 
     createPlot(x, y, pointsX, pointsY) {
         const ecgTrace = {

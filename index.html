@@ -16,11 +16,6 @@
     <div id="plot" style="width:100%"></div>
     <script>
         ecg = new ECGplot()
-        document.addEventListener("DOMContentLoaded", function () {
-            ecg.createPlot()
-            const submitButton = document.getElementById("submit");
-            submitButton.addEventListener("click", ecg.updatePlot.bind(ecg));
-        });
     </script>
 </body>
 
